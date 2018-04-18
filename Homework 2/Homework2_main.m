@@ -11,12 +11,12 @@ clear; close all; clc;
 %   2: Own MDP (gridworld)
 %   3: Provided MDP
 
-%   I am using a gamma of 0.9 (eventhough this is a finite horizon case
-%   This can be changes in the 
 
 % ************************************************* %
-PART = 3;
-gamma = 0.9;
+PART = 2;
+gamma = 1;
+% Define time steps
+tStep = 10;
 % ************************************************* %
 
 % Parse the text file:
@@ -56,9 +56,6 @@ R = reshape(R,num_actions,num_states)';
 % This makes reward a function of only states R(S)
 % TODO: Fix this in the MDP class so that it can access R(S,A)
 Reward = R(:,1);
-
-% Define time steps
-tStep = 10;
 
 %MDP (numstates, numactions, actions, rewards)
 mdp = MDP(num_states, num_actions, A, Reward, tStep, gamma);
