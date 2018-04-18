@@ -6,7 +6,7 @@ classdef MDP < handle
         num_actions
         actions
         rewards
-        gamma = 0.9
+        gamma = 1
         Value
         time_steps
     end

@@ -4,11 +4,28 @@
 % Yathartha Tuladhar
 % April 16th, 2018
 
-clear; close all;
+clear; close all; clc;
+%   Which part of the assignment would you like to run?     %
+%   Select from 1, 2, 3
+%   1: Test MDP
+%   2: Own MDP (gridworld)
+%   3: Provided MDP
+
+% ************************************************* %
+PART = 2;
+% ************************************************* %
 
 % Parse the text file:
-fileID = fopen('MDP1.txt','r');
-
+if PART == 1
+    fileID = fopen('MDPtest.txt','r');
+elseif PART == 2
+    fileID = fopen('Part2_Own_MDP_Gridworld.txt','r');
+elseif PART == 3
+    fileID = fopen('MDP1.txt','r');
+else
+    disp("Enter Valid Part")
+end
+        
 StatesActions = textscan(fileID,'%s',2,'Delimiter',' ');
 StatesActions = str2double((StatesActions{1}));
 num_states = StatesActions(1);
@@ -36,7 +53,7 @@ R = reshape(R,num_actions,num_states)';
 Reward = R(:,1);
 
 % Define time steps
-tStep = 20;
+tStep = 2;
 
 %MDP (numstates, numactions, actions, rewards)
 mdp = MDP(num_states, num_actions, A, Reward, tStep);
@@ -46,3 +63,33 @@ finite_horizon_values = mdp.fh_value_iteration();
 
 % Find the policy
 finite_horizon_policy = mdp.fh_policy();
+
+if (PART == 1 || PART == 3)
+    disp("finite horizon values: ");
+    disp(finite_horizon_values);
+    
+    disp("finite horizon policy: ");
+    disp(finite_horizon_policy);
+end
+
+if PART == 2
+    policy = finite_horizon_policy(:,tStep);
+    policy = reshape(policy, 5, 5);
+    
+    % res is the resulting policy in plain words
+    res(policy==1) = "up";
+    res(policy==2) = "down";
+    res(policy==3) = "right";
+    res(policy==4) = "left";
+    res = res';
+    res= reshape(res,5,5);
+    
+    values = finite_horizon_values(:,tStep);
+    values = reshape(values, 5, 5);
+    
+    disp("finite horizon values: ");
+    disp(values);
+    disp("finite horizon policy: ");
+    disp(res)
+end %if
+
