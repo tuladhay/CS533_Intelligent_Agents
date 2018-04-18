@@ -11,8 +11,12 @@ clear; close all; clc;
 %   2: Own MDP (gridworld)
 %   3: Provided MDP
 
+%   I am using a gamma of 0.9 (eventhough this is a finite horizon case
+%   This can be changes in the 
+
 % ************************************************* %
-PART = 2;
+PART = 3;
+gamma = 0.9;
 % ************************************************* %
 
 % Parse the text file:
@@ -20,8 +24,9 @@ if PART == 1
     fileID = fopen('MDPtest.txt','r');
 elseif PART == 2
     fileID = fopen('Part2_Own_MDP_Gridworld.txt','r');
-elseif PART == 3
+elseif PART == 3    % CHOOSE WHICH MDP TO RUN
     fileID = fopen('MDP1.txt','r');
+    %fileID = fopen('MDP2.txt','r');
 else
     disp("Enter Valid Part")
 end
@@ -53,10 +58,10 @@ R = reshape(R,num_actions,num_states)';
 Reward = R(:,1);
 
 % Define time steps
-tStep = 2;
+tStep = 10;
 
 %MDP (numstates, numactions, actions, rewards)
-mdp = MDP(num_states, num_actions, A, Reward, tStep);
+mdp = MDP(num_states, num_actions, A, Reward, tStep, gamma);
 
 % Run value iteration
 finite_horizon_values = mdp.fh_value_iteration();

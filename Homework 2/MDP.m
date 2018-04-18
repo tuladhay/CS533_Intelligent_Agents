@@ -13,13 +13,14 @@ classdef MDP < handle
     
     
     methods       
-        function obj = MDP(num_states, num_actions, actions, rewards, tStep)
+        function obj = MDP(num_states, num_actions, actions, rewards, tStep, gamma)
             obj.num_states = num_states;
             obj.num_actions = num_actions;
             obj.actions = actions;
             obj.rewards = rewards;
             obj.Value = rewards;
             obj.time_steps = tStep;
+            obj.gamma = gamma;
         end
         
         % Reward in the MDP.txt file is a function of (state, action)
