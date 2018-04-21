@@ -13,7 +13,7 @@ clear; close all; clc;
 
 
 % ************************************************* %
-PART = 2;
+PART = 1;
 gamma = 1;
 % Define time steps
 tStep = 10;
