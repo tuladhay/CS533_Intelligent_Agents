@@ -9,19 +9,9 @@ import argparse
     grid[0][0] = num_states
     grid[0][1] = num_actions
 """
-
-# USE test_mdp.py instead
-# That is the latest one I worked on
-
-def load_args():
-
-  parser = argparse.ArgumentParser(description='Description of your program')
-  parser.add_argument('-t', '--timesteps', default=0, help='horizon length, discarded if discount provided', required=False)
-  parser.add_argument('-g', '--gamma', default=0, help='discount factor', required=False)
-  parser.add_argument('-i', '--input_file', default='MDP1.txt', help='input file with MDP description', required=True)
-  parser.add_argument('-e', '--epsilon', default=None, help='epsilon, or early stopping conditions', required=False)
-  args = parser.parse_args()
-  return args
+# This uses the original code for finding the policy.
+# Whereas in test_mdp.py, I use my own method of finding policy
+# This also has one more loop when doing value iteration. I don't understand why
 
 def load_data(path):
 
@@ -41,7 +31,22 @@ def load_data(path):
         for i in range(num_actions):
             actions.append(grid[(i*num_states):((1+i)*num_states)])
         train = np.array(train)
+
+        # To convert the train[-1] containing rewards into a float
+        # if this does not work, try replacing split() with split(' ')
+        if isinstance(train[-1], str):
+            train[-1] = [float(a) for a in train[-1].split()]
+        print()
     return train, actions
+
+
+class Parsed(object):
+    def __init_(self):
+        self.input_file = "MDPtest.txt"
+        self.gamma = 1
+        self.timesteps = 10
+        self.epsilon = None
+
 
 class MDP(object):
 
@@ -54,10 +59,7 @@ class MDP(object):
         self.rewards = grid[-1]
         self.Value = [x for x in self.rewards]
         self.print_attrs()
-        if args.epsilon is None:
-            self.epsilon = ((1*10**-10)*((1-self.gamma)**2))/(2*(self.gamma**2))
-        else:
-            self.epsilon = float(args.epsilon)
+        self.epsilon = 0.0
 
     def print_attrs(self):
         print "number of states: {}\n".format(self.num_states)
@@ -99,12 +101,13 @@ class MDP(object):
     """
     def Q(self) :
 
-
         # fill in Utility for each state
         max_state = 1
-        if self.epsilon > 0:
-            while max_state > self.epsilon:
-                max_state = 0
+        # for finite horizon, collect intermediate V and Pi
+        values, policies = [], []
+        for it in range(int(self.args.timesteps)):
+            for s in range(it):
+                print it
                 new_value = [0]*self.num_states
                 next_prob = []
                 for state in range(self.num_states):
@@ -113,27 +116,11 @@ class MDP(object):
                         max_state = max(max_state, abs(self.Value[state] - state_value))
                         new_value[state] = state_value
                 self.Value = new_value
+            values.append(self.Value)
+            policies.append(self.policy())
 
-        else:
-            # for finite horizon, collect intermediate V and Pi
-            values, policies = [], []
-            for it in range(int(self.args.timesteps)):
-                for s in range(it):
-                    print it
-                    new_value = [0]*self.num_states
-                    next_prob = []
-                    for state in range(self.num_states):
-                        state_value = self.V(state)
-                        if state_value is not None:
-                            max_state = max(max_state, abs(self.Value[state] - state_value))
-                            new_value[state] = state_value
-                    self.Value = new_value
-                values.append(self.Value)
-                policies.append(self.policy())
+        return values, policies     # this is for finite horizon
 
-            return values, policies
-
-        return self.Value
 
     """ finds the best policy based on the current utility function
         simply returns the best next state: next state with the highest utility
@@ -154,24 +141,27 @@ class MDP(object):
             proto_policy.append(argmax(state))
         return proto_policy
 
-if __name__ == '__main__':
-    args = load_args()
-    grid, actions = load_data(args.input_file)
-    mdp = MDP(args, grid, actions)
-    if int(args.timesteps) > 0: finite = True
-    else: finite = False
 
-    if finite is False:
-        Utility = mdp.Q()
-        Policy = mdp.policy()
-        U = ["%.5f" % v for v in Utility]
-        P = ["%.5f" % v for v in Policy]
-        print "**************************************\nEnd Policy: {}\nEnd Value function: {}\n**************************************".format(P, U)
-    else:
-        Utility, Policy = mdp.Q()
-        for i in range(10):
-            U = ["%.5f" % v for v in Utility[i]]
-            P = ["%.5f" % v for v in Policy[i]]
-            print "***********************************"
-            print "Utility for state {} : {}".format(i, U)
-            print "Policy for state {}  : {}\n**************************************".format(i, P)
+if __name__=="__main__":
+    args = Parsed() # just for testing
+    args.input_file = "MDP1.txt"
+    args.gamma = 1
+    args.timesteps = 10
+    args.epsilon = 0.0
+
+    grid, actions = load_data(args.input_file)
+    # Actions contain all the transitions probabilities related with Action1 and Action2
+    # Action[action_number][state][next_state]
+
+    mdp = MDP(args, grid, actions)
+
+    #  If finite horizon
+    Utility, Policy = mdp.Q()
+    for i in range(10):
+        U = ["%.5f" % v for v in Utility[i]]
+        P = ["%.5f" % v for v in Policy[i]]
+        print "***********************************"
+        print "Utility for state {} : {}".format(i, U)
+        print "Policy for state {}  : {}\n**************************************".format(i, P)
+
+    print()

@@ -1,0 +1,6 @@
+The same homework was implemented in both Matlab and Python.
+
+Check the outputs from both implementations.
+
+test_mdp_standalone uses the implementation by someone else i found.
+test_mdp uses my implementation. It requires classMDP.py
