@@ -3,6 +3,8 @@ import re
 import argparse
 from classMDP import MDP
 
+# Can solve for both finite and infinite horizon cases
+
 
 def load_data(path):
 
@@ -45,21 +47,21 @@ def load_args():
 
     parser = argparse.ArgumentParser(description='Description of your program')
     parser.add_argument('-t', '--timesteps', default=0, help='horizon length, discarded if discount provided', required=False)
-    parser.add_argument('-g', '--gamma', default=1, help='discount factor', required=False)
+    parser.add_argument('-g', '--gamma', default=0.99, help='discount factor', required=False)
     parser.add_argument('-i', '--input_file', default='MDP1.txt', help='input file with MDP description', required=True)
-    parser.add_argument('-e', '--epsilon', default=None, help='epsilon, or early stopping conditions', required=False)
+    parser.add_argument('-e', '--epsilon', default=0.01, help='epsilon, or early stopping conditions', required=False)
     args = parser.parse_args()
     return args
 
 
 if __name__=="__main__":
-    args = Parsed() # just for testing
-    args.input_file = "MDP2.txt"
-    args.gamma = 1
-    args.timesteps = 10
-    args.epsilon = 0.0
+    # args = Parsed() # just for testing
+    # args.input_file = "MDPtest.txt"
+    # args.gamma = 0.99
+    # args.timesteps = 0
+    # args.epsilon = 0.01  # for Infinite horizon case. say that max_s |V(s)-V'(s)| = epsilon.
 
-    #args = load_args()
+    args = load_args()
 
     grid, actions = load_data(args.input_file)
     # Actions contain all the transitions probabilities related with Action1 and Action2
@@ -68,12 +70,20 @@ if __name__=="__main__":
     mdp = MDP(args, grid, actions)
 
     #  If finite horizon
-    Utility, Policy = mdp.value_iteration()
-    for i in range(10):
-        U = ["%.4f" % v for v in Utility[i]]
-        P = ["%.4f" % v for v in Policy[i]]
+    if args.timesteps is 0:
+        Value, Policy = mdp.value_iteration()
+        U = ["%.4f" % v for v in Value]
+        P = ["%.4f" % v for v in Policy]
+        print "**************************************\nPolicy: {}\nValue : {}\n**************************************".format(
+            P, U)
 
-        print "Value for state {}   : {}".format(i, U)
-        print "Policy for state {}  : {}\n".format(i, P)
+    else:
+        Value, Policy = mdp.value_iteration()
+        for i in range(10):
+            U = ["%.4f" % v for v in Value[i]]
+            P = ["%.4f" % v for v in Policy[i]]
 
-    print()
+            print "Value for state {}   : {}".format(i, U)
+            print "Policy for state {}  : {}\n".format(i, P)
+
+        print()

@@ -11,7 +11,7 @@ import argparse
 """
 
 # USE test_mdp.py instead
-# That is the latest one I worked on
+# That is the latest one I worked on for HW2
 
 def load_args():
 

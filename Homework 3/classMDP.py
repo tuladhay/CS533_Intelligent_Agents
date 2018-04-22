@@ -4,17 +4,22 @@ import numpy as np
 # Reward(), T(), V() and Q()
 
 class MDP(object):
+    # Capable of both finite and infinite horizon
+    # for infinite horizon, do not provide timestep or set it to 0
 
     def __init__(self, args, grid, actions):
         # grid is only being used for num_states and num_actions and rewards
         # Maybe rename "grid" to something else
-        self.args = args
+        self.args = args #input_file, gamma, timesteps, epsilon
         self.grid = grid
         self.gamma = float(args.gamma)
         self.num_states, self.num_actions = grid[0]
         self.actions = actions
         self.rewards = grid[-1]
         self.Value = [x for x in self.rewards]
+        self.timesteps = int(self.args.timesteps) # 0 for infinite horizon case
+        self.epsilon = args.epsilon # make it a required argument, unless there is a way to initialize it
+        self.policy = [0]*self.num_states # for infinite horizon case
 
     def get_reward(self, state):
         return self.rewards[state]
@@ -57,19 +62,44 @@ class MDP(object):
     def value_iteration(self):
         # For finite horizon, iterate till the given timestep, and record the state values for each time step
 
-        values_tstep = [] # stores each iteration values
-        policies = []
+        if self.timesteps is 0:
+            # see Sutton and Barto 4.4 Value Iteration Algorithms. delta = |v - V(S)|
+            # epsilon is the threshold in this algorithm
+            delta = 1
+            print("Infinite horizon case since time-step provided was 0")
+            while delta > self.epsilon:
+                delta = 0
+                new_value = [0]*self.num_states
+                policy_t = [0]*self.num_states
 
-        for t in range(int(self.args.timesteps)):
-            new_value = [0]*self.num_states
-            policy_t = [0]*self.num_states
+                for s in range(self.num_states):
+                    new_value[s], policy_t[s] = self.get_value_and_action(s)
+                    delta = max(delta, abs(self.Value[s] - new_value[s]))
 
-            for s in range(self.num_states):
-                new_value[s], policy_t[s] = self.get_value_and_action(s)
+                self.Value = new_value
+                self.policy = policy_t
 
-            self.Value = new_value
+            print("Infinite horizon done")
+            return self.Value, self.policy
 
-            values_tstep.append(new_value)
-            policies.append(policy_t)
 
-        return values_tstep, policies
+        else:
+
+            values_tstep = []   # stores each iteration values
+            policies = []
+
+            print("Finite horizon case (since time-step provided.")
+            for t in range(int(self.args.timesteps)):
+                new_value = [0]*self.num_states
+                policy_t = [0]*self.num_states
+
+                for s in range(self.num_states):
+                    new_value[s], policy_t[s] = self.get_value_and_action(s)
+
+                self.Value = new_value
+
+                values_tstep.append(new_value)
+                policies.append(policy_t)
+
+            return values_tstep, policies
+
