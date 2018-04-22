@@ -23,7 +23,7 @@ class MDP(object):
         # The reward as a function of state is static thus just [-1 -1 0] in the test case
 
     def get_transition_prob(self, action, state, next_state):
-        return self.actions[action, state, next_state]
+        return self.actions[action][state][next_state]
 
     def get_value(self, state):
         p_actions = []  # just a container
@@ -73,3 +73,5 @@ class MDP(object):
 
             values_tstep.append(new_value)
             policies.append(policy_t)
+
+        return values_tstep, policies
