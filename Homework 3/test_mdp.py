@@ -118,7 +118,6 @@ class MDP(object):
 
         return values, policies     # this is for finite horizon
 
-        # return self.Value # I think this is for infinite horizon
 
     """ finds the best policy based on the current utility function
         simply returns the best next state: next state with the highest utility

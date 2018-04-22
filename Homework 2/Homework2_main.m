@@ -13,7 +13,7 @@ clear; close all; clc;
 
 
 % ************************************************* %
-PART = 1;
+PART = 3;
 gamma = 1;
 % Define time steps
 tStep = 10;
@@ -65,6 +65,11 @@ finite_horizon_values = mdp.fh_value_iteration();
 
 % Find the policy
 finite_horizon_policy = mdp.fh_policy();
+% There is a problem with doing this, since by running the value iteration
+% above, I will be calculating the policy using only the final value of the
+% states. Thus the optimal policy for all time steps will be the one for
+% the final (highest) time step. NEED TO FIX THIS.
+
 
 if (PART == 1 || PART == 3)
     disp("finite horizon values: ");

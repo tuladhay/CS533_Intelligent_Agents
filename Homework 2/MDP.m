@@ -60,12 +60,18 @@ classdef MDP < handle
             finite_horizon_values = zeros(obj.num_states, obj.time_steps);
             for t = 1:obj.time_steps
                 new_value = 0;
-                for state = 1:obj.num_states
-                    best_value = obj.get_value(state);
-                    finite_horizon_values(state,t) = best_value;
-                    % update the obj.Value
-                    obj.Value(state) = best_value;
-                end
+                
+                %for n = 1:t %why this loop from 1:t?
+                
+                    for state = 1:obj.num_states
+                        best_value = obj.get_value(state);
+                        finite_horizon_values(state,t) = best_value;
+                        % update the obj.Value
+                        obj.Value(state) = best_value;
+                    end
+                    
+                %end %why this loop?
+                
             end
         end
         
