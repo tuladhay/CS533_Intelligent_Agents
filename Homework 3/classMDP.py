@@ -28,41 +28,70 @@ class MDP(object):
         # The reward as a function of state is static thus just [-1 -1 0] in the test case
 
     def get_transition_prob(self, action, state, next_state):
+        # print(action, state, next_state)
         return self.actions[action][state][next_state]
 
     def get_value_and_action(self, state):
-        p_actions = []  # just a container
-        max_p, sum_p = 0, 0
-        # need to rename there to more intuitive names
+        # *************** my method *****************************************************
+        # p_actions = []  # just a container
+        # max_p, sum_p = 0, 0
+        # # need to rename there to more intuitive names
+        # which_action = None
+        #
+        # for action in range(self.num_actions):
+        #     # For all the actions, we want to find the possible future rewards
+        #     # If an agent takes an action[a], and given it's current "state", calculate the probability to transitioning
+        #     # to all "next_states"
+        #     sum_p = 0
+        #     p_actions = []
+        #
+        #     for next_state in range(self.num_states):
+        #         p_actions.append((self.get_transition_prob(action,state,next_state), action, next_state))
+        #         # need double brackets since append only takes one argument in this case
+        #
+        #     for p in p_actions:
+        #         sum_p += p[0]*self.Value[p[2]]
+        #         # transition_probability * current_value of that state
+        #         # Now, we have sum of all the future rewards from that state and action, T1V1 + T2V2 + ... TnVn
+        #
+        #     if (max_p == 0) or (sum_p > max_p):
+        #         max_p = sum_p
+        #         which_action = action
+        #
+        # # Now, return the value of that state: V(s) = max[ R(s,a) + sum(Tn*Vn) ]
+        # return (self.gamma*max_p + self.get_reward(state)), which_action
+
+
+
+
+        # ************** Other method *************************************************
         which_action = None
 
+        p_actions = []
+        max_p, sum_p = 0, 0
         for action in range(self.num_actions):
-            # For all the actions, we want to find the possible future rewards
-            # If an agent takes an action[a], and given it's current "state", calculate the probability to transitioning
-            # to all "next_states"
             sum_p = 0
             p_actions = []
-
             for next_state in range(self.num_states):
-                p_actions.append((self.get_transition_prob(action,state,next_state), action, next_state))
-                # need double brackets since append only takes one argument in this case
-
+                p_actions.append((self.get_transition_prob(action, state, next_state), action, next_state))
             for p in p_actions:
-                sum_p += p[0]*self.Value[p[2]]
-                # transition_probability * current_value of that state
-                # Now, we have sum of all the future rewards from that state and action, T1V1 + T2V2 + ... TnVn
-
-            if (max_p == 0) or (sum_p > max_p):
+                sum_p += p[0] * self.Value[p[2]]
+            if (sum_p > max_p) or (max_p is 0):
                 max_p = sum_p
                 which_action = action
+        if self.timesteps > 0:
+            return max_p + self.get_reward(state), which_action
+        else:
+            return self.gamma * max_p + self.get_reward(state), which_action
+        # *******************************************************************************
 
-        # Now, return the value of that state: V(s) = max[ R(s,a) + sum(Tn*Vn) ]
-        return (self.gamma*max_p + self.get_reward(state)), which_action
+
+
 
     def value_iteration(self):
         # For finite horizon, iterate till the given timestep, and record the state values for each time step
 
-        if self.timesteps is 0:
+        if self.timesteps == 0:
             # see Sutton and Barto 4.4 Value Iteration Algorithms. delta = |v - V(S)|
             # epsilon is the threshold in this algorithm
             delta = 1

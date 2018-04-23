@@ -15,9 +15,9 @@ def load_args():
 
     parser = argparse.ArgumentParser(description='Description of your program')
     parser.add_argument('-t', '--timesteps', default=0, help='horizon length, discarded if discount provided', required=False)
-    parser.add_argument('-g', '--gamma', default=0, help='discount factor', required=False)
-    parser.add_argument('-f', '--input_file', default='MDP1.txt', help='input file with MDP description')
-    parser.add_argument('-e', '--epsilon', default=0.9, type=float, help='epsilon, or early stopping conditions', required=False)
+    parser.add_argument('-g', '--gamma', default=0.9, help='discount factor', required=False)
+    parser.add_argument('-f', '--input_file', default='parking.txt', help='input file with MDP description')
+    parser.add_argument('-e', '--epsilon', default=0.01, type=float, help='epsilon, or early stopping conditions', required=False)
     parser.add_argument('-i', '--intermediate', default=False, type=bool,  help='print out intermeiate policies/value functions while it learns', required=False)
     parser.add_argument('-b', '--build', default=False, type=bool, help='use the parking lot planner')
     parser.add_argument('-s', '--spaces', default=8, type=int, help='number of spaces in each row of the parking lot')
@@ -68,7 +68,8 @@ class MDP(object):
         self.args = args
         self.grid = grid
         self.gamma = float(args.gamma)
-        self.epsilon = 1 - self.gamma
+        # self.epsilon = 1 - self.gamma
+        self.epsilon = self.args.epsilon # I did this
         self.num_states, self.num_actions = grid[0]
         self.actions = actions
         self.rewards = grid[-1]
@@ -78,9 +79,9 @@ class MDP(object):
         self.Utility = [x for x in self.rewards]
         self.print_attrs()
         self.timesteps = int(args.timesteps)
-        if (args.epsilon is 0) and (self.gamma > 0):
-            self.epsilon = ((1*10**-10)*((1-self.gamma)**2))/(2*(self.gamma**2))
-        else: self.epsilon = float(args.epsilon)
+        # if (args.epsilon is 0) and (self.gamma > 0):
+        #     self.epsilon = ((1*10**-10)*((1-self.gamma)**2))/(2*(self.gamma**2))
+        # else: self.epsilon = float(args.epsilon)
 
     def print_attrs(self):
         print "number of states: {}\n".format(self.num_states)
@@ -93,7 +94,9 @@ class MDP(object):
     def T(self, state, action, next_state=None):
 
         if next_state == None:
+            print("None state encountered")
             return self.actions[action][state]
+
         # returns probability of going to state X from state Y """
         return self.actions[action][state][next_state]
 
@@ -129,7 +132,7 @@ class MDP(object):
 
         max_state = 1
         if self.timesteps == 0:
-            print "searching infinite horizon"
+            print "searching infinite horizon\n"
             print("Epsilon = " + str(self.epsilon))
             print("Gamma = " + str(self.gamma))
 
@@ -138,10 +141,13 @@ class MDP(object):
                 new_util = [0]*self.num_states
                 next_prob = []
                 for state in range(self.num_states):
-                    state_util = self.util(state)
-                    if state_util is not None:
-                        max_state = max(max_state, abs(self.Utility[state] - state_util))
-                        new_util[state] = state_util
+                    # state_util = self.util(state)
+                    new_util[state] = self.util(state)
+                    # if state_util is not None:
+                    #     max_state = max(max_state, abs(self.Utility[state] - state_util))
+                    #     new_util[state] = state_util
+                    max_state = max(max_state, abs(self.Utility[state] - new_util[state]))
+
                 self.Utility = new_util
             print("Searching done")
 
@@ -328,41 +334,46 @@ if __name__ == '__main__':
     #   build_mdp(args)
     #   sys.exit(0)
 
-    args.input_file = "MDP1.txt"
+    args.input_file = "parking.txt"
+    args.run_trial = False
+    args.epsilon = 0.01
 
     grid, actions = load_data(args.input_file)
     mdp = MDP(args, grid, actions)
-    sim = Simulator(mdp)
+    #sim = Simulator(mdp)
 
     if int(args.timesteps) > 0: finite = True
     else: finite = False
 
-    if args.q_learner:
-        RL(sim, mdp)
+    # if args.q_learner:
+    #     RL(sim, mdp)
 
-    if finite is False:
+    if finite == False:
       Utility = mdp.Q()
       Policy = mdp.policy()
-      U = ["%.5f" % v for v in Utility]
-      P = ["%.5f" % v for v in Policy]
+      U = ["%.4f" % v for v in Utility]
+      P = ["%.4f" % v for v in Policy]
       print "**************************************\nPolicy: {}\nValue : {}\n**************************************".format(P, U)
-      if args.run_trial:
-          policy = [int(float(p)) for p in P]
-
-          simulate_policy(sim, mdp, policy, 1000, task='toy1' )
+      # if args.run_trial:
+      #     policy = [int(float(p)) for p in P]
+      #
+      #     simulate_policy(sim, mdp, policy, 1000, task='toy1' )
     else:
       print "***********************************"
       Utility, Policy = mdp.Q()
       if args.intermediate:
           for i in range(int(args.timesteps)):
-              U = ["%.5f" % v for v in Utility[i]]
+              U = ["%.4f" % v for v in Utility[i]]
               print U
           for i in range(int(args.timesteps)):
-              P = ["%.5f" % v for v in Policy[i]]
+              P = ["%.4f" % v for v in Policy[i]]
               print P
       else:
-          U = ["%.5f" % v for v in Utility]
-          P = ["%.5f" % v for v in Policy]
+          U = ["%.4f" % v for v in Utility]
+          P = ["%.4f" % v for v in Policy]
           print "Finite Utility : {}".format(U)
           print "Finite Policy  : {}\n".format(P)
+
+
+    print()
 

@@ -4,7 +4,7 @@ import argparse
 from classMDP import MDP
 
 # Can solve for both finite and infinite horizon cases
-
+# This file is different from the one in HW 2. Basically this has the added feature of infinite horizon
 
 def load_data(path):
 
@@ -14,12 +14,21 @@ def load_data(path):
         train = [re.sub(r'[^\x00-\x7f]',r'', line) for line in train]
         train[0] = [int(a) for a in train[0].split(' ')]
         num_states, num_actions = train[0]
+
+        print(num_states, num_actions)
         lines = num_actions * num_states + num_actions
         grid = []
+        # for i in range(1, lines+(num_actions-1)):
+        #     if (i-1) % (num_states+1) is not 0:
+        #         grid.append([float(n) for n in train[i].split(' ')[::4]])
+        #         train[i] = [float(n) for n in train[i].split(' ')[::4]]
         for i in range(1, lines+(num_actions-1)):
-            if (i-1) % (num_states+1) is not 0:
-                grid.append([float(n) for n in train[i].split(' ')[::4]])
-                train[i] = [float(n) for n in train[i].split(' ')[::4]]
+            if ((i-1) % (num_states+1) is not 0) and (len(train)-1 >= i):
+                if train[i] == "":
+                    pass
+                else:
+                    grid.append([float(n) for n in train[i].split()])#[::4]])
+                    train[i] = [float(n) for n in train[i].split()]#[::4]]
         actions = []
         for i in range(num_actions):
             actions.append(grid[(i*num_states):((1+i)*num_states)])
@@ -36,7 +45,7 @@ def load_data(path):
 # For testing purpose
 class Parsed(object):
     def __init_(self):
-        self.input_file = "MDPtest.txt"
+        self.input_file = None
         self.gamma = 1
         self.timesteps = 10
         self.epsilon = None
@@ -47,7 +56,7 @@ def load_args():
 
     parser = argparse.ArgumentParser(description='Description of your program')
     parser.add_argument('-t', '--timesteps', default=0, help='horizon length, discarded if discount provided', required=False)
-    parser.add_argument('-g', '--gamma', default=0.99, help='discount factor', required=False)
+    parser.add_argument('-g', '--gamma', default=0.90, help='discount factor', required=False)
     parser.add_argument('-i', '--input_file', default='MDP1.txt', help='input file with MDP description', required=True)
     parser.add_argument('-e', '--epsilon', default=0.01, help='epsilon, or early stopping conditions', required=False)
     args = parser.parse_args()
@@ -55,13 +64,16 @@ def load_args():
 
 
 if __name__=="__main__":
-    # args = Parsed() # just for testing
-    # args.input_file = "MDPtest.txt"
-    # args.gamma = 0.99
-    # args.timesteps = 0
-    # args.epsilon = 0.01  # for Infinite horizon case. say that max_s |V(s)-V'(s)| = epsilon.
+    # Comment this block to run from terminal
+    args = Parsed() # just for testing
+    args.input_file = "parking.txt"
+    args.gamma = 0.90
+    args.timesteps = 0
+    args.epsilon = 0.01  # for Infinite horizon case. say that max_s |V(s)-V'(s)| = epsilon.
+    # *********************************************************************************************
 
-    args = load_args()
+    # Uncomment to run from terminal
+    #args = load_args()
 
     grid, actions = load_data(args.input_file)
     # Actions contain all the transitions probabilities related with Action1 and Action2
