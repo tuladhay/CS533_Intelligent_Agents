@@ -1,5 +1,3 @@
-import numpy as np
-
 # This is the MDP class with useful functions:
 # Reward(), T(), V() and Q()
 
@@ -7,19 +5,20 @@ class MDP(object):
     # Capable of both finite and infinite horizon
     # for infinite horizon, do not provide timestep or set it to 0
 
-    def __init__(self, args, grid, actions):
-        # grid is only being used for num_states and num_actions and rewards
-        # Maybe rename "grid" to something else
+    def __init__(self, args, table, actions):
+        # table is only being used for num_states and num_actions and rewards
+
         self.args = args #input_file, gamma, timesteps, epsilon
-        self.grid = grid
+        self.table = table
         self.gamma = float(args.gamma)
-        self.num_states, self.num_actions = grid[0]
+        self.epsilon = args.epsilon  # make it a required argument, unless there is a way to initialize it
+        self.num_states, self.num_actions = table[0]
         self.actions = actions
-        self.rewards = grid[-1]
+        self.rewards = table[-1]
         self.Value = [x for x in self.rewards]
+        self.policy = [0] * self.num_states  # for infinite horizon case
         self.timesteps = int(self.args.timesteps) # 0 for infinite horizon case
-        self.epsilon = args.epsilon # make it a required argument, unless there is a way to initialize it
-        self.policy = [0]*self.num_states # for infinite horizon case
+
 
     def get_reward(self, state):
         return self.rewards[state]
@@ -85,9 +84,6 @@ class MDP(object):
             return self.gamma * max_p + self.get_reward(state), which_action
         # *******************************************************************************
 
-
-
-
     def value_iteration(self):
         # For finite horizon, iterate till the given timestep, and record the state values for each time step
 
@@ -108,9 +104,8 @@ class MDP(object):
                 self.Value = new_value
                 self.policy = policy_t
 
-            print("Infinite horizon done")
+            #print("Infinite horizon done")
             return self.Value, self.policy
-
 
         else:
 
