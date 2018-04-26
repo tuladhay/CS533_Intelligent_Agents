@@ -1,6 +1,6 @@
 from classMDP import MDP
 from utilities import load_args, load_data
-
+from build_parking_mdp import MDP_Parking, Actions
 # Can solve for both finite and infinite horizon cases
 # This file is different from the one in HW 2. Basically this has the added feature of infinite horizon
 
@@ -22,6 +22,7 @@ Output:
     prints the value function and policy to screen
 
 '''
+
 
 if __name__ == "__main__":
 
@@ -54,4 +55,50 @@ if __name__ == "__main__":
             print "Value for state {}   : {}".format(i, V)
             print "Policy for state {}  : {}\n".format(i, P)
 
-        print()
+
+    # Print policy with action name
+    policy_w_name = []
+    for p in Policy:
+        if p == 0:
+            policy_w_name.append("Park")
+        elif p == 1:
+            policy_w_name.append("Drive")
+        else:
+            policy_w_name.append("Exit")
+
+    # for i in range(len(policy_w_name)):
+    #     print("Value = " + str(V[i]) + " \tPolicy = " + policy_w_name[i])
+
+
+    mdp = MDP_Parking()
+    mdp.build_mdp()
+    labels = []
+
+    for x in range(mdp.num_states-1):
+        n = mdp.state_id_to_params[x]
+        if n[0] == 0:
+            aisle = "A"
+        if n[0] == 1:
+            aisle = "B"
+
+        row = n[1]
+
+        if n[2] == 0:
+            O = "Unoccupied"
+        if n[2] == 1:
+            O = "Occupied  "
+
+        if n[3] == 0:
+            park = "NotParked"
+        if n[3] == 1:
+            park = "Parked  "
+
+        labels.append([aisle, row, O, park])
+
+    print("\n\nPrinting the value function")
+    for l in range(len(labels)):
+        print(str(labels[l]) + "\t\t" + str(Value[l]))
+
+    print("\n\nPrinting the corresponding actions")
+    for l in range(len(labels)):
+        print(str(labels[l]) + "\t\t" + str(policy_w_name[l]))

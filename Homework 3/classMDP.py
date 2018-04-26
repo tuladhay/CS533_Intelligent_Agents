@@ -14,10 +14,22 @@ class MDP(object):
         self.epsilon = args.epsilon  # make it a required argument, unless there is a way to initialize it
         self.num_states, self.num_actions = table[0]
         self.actions = actions
-        self.rewards = table[-1]
-        self.Value = [x for x in self.rewards]
+
         self.policy = [0] * self.num_states  # for infinite horizon case
         self.timesteps = int(self.args.timesteps) # 0 for infinite horizon case
+
+        # ************************************************************************************
+        # THIS WHOLE HACKISH THING WAS TO FIX THE MDP file format
+
+        # reward_start = (self.num_states*self.num_actions) + self.num_actions + 2
+        # select= []
+        # for n in range(reward_start, len(table)):
+        #     select.append(table[n][1])
+
+        # ************************************************************************************
+
+        self.rewards = table[-1]
+        self.Value = [x for x in self.rewards]
 
 
     def get_reward(self, state):
@@ -75,6 +87,7 @@ class MDP(object):
                 p_actions.append((self.get_transition_prob(action, state, next_state), action, next_state))
             for p in p_actions:
                 sum_p += p[0] * self.Value[p[2]]
+
             if (sum_p > max_p) or (max_p is 0):
                 max_p = sum_p
                 which_action = action
@@ -126,4 +139,3 @@ class MDP(object):
                 policies.append(policy_t)
 
             return values_tstep, policies
-

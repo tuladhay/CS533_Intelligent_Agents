@@ -1,5 +1,7 @@
 import numpy as np
 import argparse
+from classMDP import MDP
+
 
 
 '''
@@ -11,7 +13,7 @@ Output: an MDP with the filename (.txt) provided in the arguments
 
 '''
 
-class MDP_Parking(object):
+class MDP_Parking(MDP):
     def __init__(self):
         # Get necessary arguments from terminal. If run from IDE, it will use default values
         args = self.load_args()
@@ -154,12 +156,13 @@ class MDP_Parking(object):
                                     # Probability of transitioning into occupied next state
                                     self.T[a][current_state, next_state2] = prob_occupied
 
+
     def load_args(self):
         parser = argparse.ArgumentParser(description='Create MDP for parking problem.')
         parser.add_argument('-n_row', '--num_rows', help="rows [int] in each aisle", type=int, default=10)
-        parser.add_argument('-r_h', '--handicap_reward', type=int, default=-100,
+        parser.add_argument('-r_h', '--handicap_reward', type=int, default=100,
                             help="reward [int] for parking in handcapped spot")
-        parser.add_argument('-r_c', '--crash_reward', type=int, default=-1000,
+        parser.add_argument('-r_c', '--crash_reward', type=int, default=1000,
                             help="reward [int] for parking in occupied spot")
         parser.add_argument('-r_d', '--drive_reward', type=int, default=-1, help="reward for driving/not parking")
 
@@ -174,14 +177,14 @@ class MDP_Parking(object):
             (column, row, occupied, parked) = self.state_id_to_params[id]
             return (column, row, occupied, parked)
         else:
-            return (-1, -1, -1, -1) # terminal state
+            return (-1, -1, -1, -1) # this is the terminal state
 
-    def save_to_file(self, filename):
+    def save_mdp(self, filename):
 
         with open(filename, 'w') as f:
             f.write('{} {}\n\n'.format(self.num_states, self.num_actions))
             for a in range(self.num_actions):
-                matrix = '\n'.join('    '.join('{0:0.8f}'.format(float(c)) for c in r) for r in self.T[a])
+                matrix = '\n'.join('    '.join('{0:0.8f}'.format(float(lot)) for lot in spot) for spot in self.T[a])
                 f.write('{}\n\n'.format(matrix))
             f.write('    '.join(['{0:0.8f}'.format(float(a)) for a in self.R]))
             f.write('\n')
@@ -198,4 +201,4 @@ class Actions(object):
 if __name__=="__main__":
     mdp = MDP_Parking()
     mdp.build_mdp()
-    mdp.save_to_file('my_MDP.txt')
+    mdp.save_mdp('my_MDP.txt')
