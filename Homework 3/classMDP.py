@@ -31,7 +31,7 @@ class MDP(object):
         return self.actions[action][state][next_state]
 
     def get_value_and_action(self, state):
-        # *************** my method *****************************************************
+        # ********************************************************************
         # p_actions = []  # just a container
         # max_p, sum_p = 0, 0
         # # need to rename there to more intuitive names
